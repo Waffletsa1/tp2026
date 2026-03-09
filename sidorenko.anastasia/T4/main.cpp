@@ -58,6 +58,17 @@ int main()
     composite->addShape(std::make_unique<RightTrapezoid>(Point(9, 3), 2, 1, 3));
     shapes.push_back(std::move(composite));
     printInfo(shapes);
+    double factor = 0.0;
+    if (!(std::cin >> factor)) 
+    {
+        std::cerr << "Error: no scale factor provided\n";
+        return 1;
+    }
+    if (factor <= 0.0) 
+    {
+        std::cerr << "Error: scale factor must be positive\n";
+        return 1;
+    }
     for (size_t i = 0; i < shapes.size(); ++i)
     {
         shapes[i]->scale(2.0);
