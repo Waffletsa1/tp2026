@@ -55,11 +55,11 @@ printComposite(*composite);
 double coeff;
 std::cin >> coeff;
 
-rect1.scale(2.0);
-rect2.scale(2.0);
-circ1.scale(2.0);
-trap1.scale(2.0);
-composite->scale(2.0);
+rect1.scale(coeff);
+rect2.scale(coeff);
+circ1.scale(coeff);
+trap1.scale(coeff);
+composite->scale(coeff);
 
 std::cout << "\n========== after 2x scaling ==========\n";
 printShape(rect1);
