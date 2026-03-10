@@ -18,15 +18,6 @@ double CompositeShape::getArea() const {
     return area;
 }
 
-Point CompositeShape::getAverageCenter() const {
-    double accX = 0, accY = 0;
-    for (std::size_t i = 0; i < shapes.size(); ++i) {
-        accX += shapes[i]->getCenter().x;
-        accY += shapes[i]->getCenter().y;
-    }
-    return Point(accX / shapes.size(), accY / shapes.size());
-}
-
 Point CompositeShape::getCenter() const {
     std::pair<Point, Point> bounds = getBounds();
     return Point((bounds.first.x + bounds.second.x) / 2.0,
