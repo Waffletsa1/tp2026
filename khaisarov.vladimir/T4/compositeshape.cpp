@@ -75,5 +75,11 @@ void CompositeShape::move(double dx, double dy)
 
 void CompositeShape::print(std::ostream& os) const
 {
-    os << "[" << getName() << ", " << getCenter() << ", " << getArea() << "]";
+    os << std::fixed << std::setprecision(2);
+    os << "[" << getName() << ", " << getCenter() << ", " << getArea() << ":\n";
+    for (size_t i = 0; i < shapes.size(); ++i)
+    {
+        os << "  " << shapes[i]->getName() << ", " << shapes[i]->getCenter() << ", " << shapes[i]->getArea() << ",\n";
+    }
+    os << "]" << std::endl;
 }

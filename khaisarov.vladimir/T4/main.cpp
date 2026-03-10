@@ -47,7 +47,6 @@ int main()
     try
     {
         std::vector<std::unique_ptr<Shape>> container;
-        std::cout << "before scaling:\n";
 
         Point pr1(1, 1);
         Point pr2(-2, -2);
@@ -73,9 +72,15 @@ int main()
 
         printCont(container);
 
-        scaleInContainer(container, 2);
+        double fact;
+        if (!(std::cin >> fact))
+        {
+            std::cerr << "error" << std::endl;
+            return 1;
+        }
 
-        std::cout << "after scaling:" << std::endl;
+        scaleInContainer(container, fact);
+
         printCont(container);
     }
     catch (const std::exception& e)
