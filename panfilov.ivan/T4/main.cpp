@@ -39,8 +39,17 @@ int main() {
         shapes.push_back(std::move(composite));
         std::cout << "Before scale\n";
         printInfo(shapes);
+        double factor = 0.0;
+        if (!(std::cin >> factor))
+        {
+            throw std::invalid_argument("invalid argument for factor");
+        }
+        if (factor <= 0.0)
+        {
+            throw std::invalid_argument("factor must be positive");
+        }
         for (auto& shape : shapes) {
-            shape->scale(2.0);
+            shape->scale(factor);
         }
         std::cout << "\nAfter scale\n";
         printInfo(shapes);
