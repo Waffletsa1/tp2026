@@ -1,7 +1,11 @@
 #include "rectangle.h"
+#include <iostream>
 #include <algorithm>
 
 Rectangle::Rectangle(const Point& bl, const Point& tr) {
+    if (bl.x_ >= tr.x_ || bl.y_ >= tr.y_) {
+        throw std::invalid_argument("bottom left coordinate must be lower than top right");
+    }
     bottomLeft = bl;
     topRight = tr;
 }

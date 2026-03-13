@@ -55,13 +55,12 @@ std::string CompositeShape::getName() const {
     return "COMPOSITE";
 }
 
-void CompositeShape::printShapes() const {
+void CompositeShape::print() const {
     std::cout << "[" << getName() << ", (" << std::fixed << std::setprecision(2) << getCenter().x_
         << ", " << getCenter().y_ << "), " << getArea() << ":\n";
     for (const auto& shape : shapes) {
-        std::cout << " [" << shape->getName() << ", (" << std::fixed << std::setprecision(2)
-            << shape->getCenter().x_ << ", " << shape->getCenter().y_ << "), "
-            << shape->getArea() << "]\n";
+        std::cout << "  ";
+        shape->print();
     }
     std::cout << "]\n";
 }

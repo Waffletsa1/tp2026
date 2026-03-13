@@ -9,17 +9,7 @@
 
 void printInfo(const std::vector<std::unique_ptr<Shape>>& shapes) {
     for (auto& shape : shapes) {
-        if (shape->getName() == "COMPOSITE") {
-            const CompositeShape* composite = dynamic_cast<const CompositeShape*>(shape.get());
-            if (composite) {
-                composite->printShapes();
-            }
-        }
-        else {
-            std::cout << "[" << shape->getName() << ", (" << std::fixed << std::setprecision(2)
-                << shape->getCenter().x_ << ", " << shape->getCenter().y_ << "), "
-                << shape->getArea() << "]\n";
-        }
+        shape->print();
     }
 }
 
@@ -51,7 +41,7 @@ int main() {
         for (auto& shape : shapes) {
             shape->scale(factor);
         }
-        std::cout << "\nAfter scale\n";
+        std::cout << "After scale\n";
         printInfo(shapes);
     }
     catch (const std::exception& e) {
