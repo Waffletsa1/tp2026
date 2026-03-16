@@ -23,7 +23,6 @@ void printInfo(const std::vector<std::unique_ptr<Shape>>& shapes)
     }
 }
 
-
 int main()
 {
     std::cout << std::fixed << std::setprecision(2);
