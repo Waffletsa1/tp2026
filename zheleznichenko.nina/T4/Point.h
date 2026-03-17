@@ -1,4 +1,5 @@
-#pragma once
+#ifndef POINT_H
+#define POINT_H
 
 struct Point
 {
@@ -13,3 +14,4 @@ struct Point
         y = y_val;
     }
 };
+#endif

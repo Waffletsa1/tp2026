@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHAPE_H
+#define SHAPE_H
 #include <string>
 #include "point.h"
 
@@ -15,3 +16,4 @@ public:
 
     virtual std::string getName() const = 0;
 };
+#endif

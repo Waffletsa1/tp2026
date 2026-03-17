@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COMPOSITESHAPE
+#define COMPOSITESHAPE
 #include "shape.h"
 #include <vector>
 #include <memory>
@@ -19,3 +20,4 @@ public:
 
     std::string getName() const override;
 };
+#endif 

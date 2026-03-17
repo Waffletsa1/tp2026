@@ -1,4 +1,5 @@
-#pragma once
+#ifdef RECTANGLE_H
+#define RECTANGLE_H
 #include "shape.h"
 
 class Rectangle : public Shape
@@ -18,3 +19,4 @@ public:
 
     std::string getName() const override;
 };
+#endif

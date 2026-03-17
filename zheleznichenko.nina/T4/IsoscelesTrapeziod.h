@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ISOSCELESTRAPEZIOD
+#define ISOSCELESTRAPEZIOD
 #include "shape.h"
 
 class IsoscelesTrapeziod : public Shape
@@ -20,3 +21,4 @@ public:
 
     std::string getName() const override;
 };
+#endif
