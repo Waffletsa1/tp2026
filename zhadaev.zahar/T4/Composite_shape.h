@@ -17,7 +17,7 @@ public:
     double getX_max() override;
     double getY_min() override;
     double getY_max() override;
-    void print();
+    void print() override;
 private:
     std::vector<std::unique_ptr<Shape>> shapes;
 };
