@@ -11,8 +11,9 @@
 
 class CompositeShape : public Shape
 {
-public:
+private:
     std::vector<std::unique_ptr<Shape>> members;
+public:
     CompositeShape() {}
     ~CompositeShape()
     {
@@ -20,7 +21,15 @@ public:
     }
     void putInComposite(std::unique_ptr<Shape> shape)
     {
+        if (dynamic_cast<CompositeShape*>(shape.get())) {
+            throw std::invalid_argument("Cannot add composite shape to another composite");
+        }
+
         members.push_back(std::move(shape));
+    }
+    const std::vector<std::unique_ptr<Shape>>& membersAccess()
+    {
+        return this->members;
     }
 
     double getArea() const override
@@ -34,15 +43,60 @@ public:
     }
     Point getCenter() const override
     {
-        Point center;
-        for (size_t i = 0; i < members.size(); i++)
+        double minX = members[0]->getMinX();
+        double minY = members[0]->getMinY();
+        double maxX = members[0]->getMaxX();
+        double maxY = members[0]->getMaxY();
+
+        for (size_t i = 1; i < members.size(); i++)
         {
-            center.x += members[i]->getCenter().x;
-            center.y += members[i]->getCenter().y;
+            if (members[i]->getMinX() < minX) minX = members[i]->getMinX();
+            if (members[i]->getMinY() < minY) minY = members[i]->getMinY();
+            if (members[i]->getMaxX() > maxX) maxX = members[i]->getMaxX();
+            if (members[i]->getMaxY() > maxY) maxY = members[i]->getMaxY();
         }
-        center.x /= static_cast<double>(members.size());
-        center.y /= static_cast<double>(members.size());
-        return center;
+
+        return Rectangle(minX, minY, maxX, maxY).getCenter();
+    }
+    double getMinX() const override
+    {
+        double minX = members[0]->getMinX();
+
+        for (size_t i = 1; i < members.size(); i++)
+        {
+            if (members[i]->getMinX() < minX) minX = members[i]->getMinX();
+        }
+        return minX;
+    }
+    double getMaxX() const override
+    {
+        double maxX = members[0]->getMaxX();
+
+        for (size_t i = 1; i < members.size(); i++)
+        {
+            if (members[i]->getMaxX() > maxX) maxX = members[i]->getMaxX();
+        }
+        return maxX;
+    }
+    double getMinY() const override
+    {
+        double minY = members[0]->getMinY();
+
+        for (size_t i = 1; i < members.size(); i++)
+        {
+            if (members[i]->getMinY() < minY) minY = members[i]->getMinY();
+        }
+        return minY;
+    }
+    double getMaxY() const override
+    {
+        double maxY = members[0]->getMaxY();
+
+        for (size_t i = 1; i < members.size(); i++)
+        {
+            if (members[i]->getMaxY() > maxY) maxY = members[i]->getMaxY();
+        }
+        return maxY;
     }
     std::string getName() const override
     {
@@ -68,15 +122,6 @@ public:
             double moveY = newShapeCenter.y - shapeCenter.y;
             members[i]->move(moveX, moveY);
             members[i]->scale(factor);
-        }
-    }
-
-    void printInfoComposite()
-    {
-        for (size_t i = 0; i < members.size(); i++)
-        {
-            std::cout << '\t' << members[i]->getName() << ", " << "(" << members[i]->getCenter().x << ", "
-                << members[i]->getCenter().y << "), " << members[i]->getArea() << ",\n";
         }
     }
 };

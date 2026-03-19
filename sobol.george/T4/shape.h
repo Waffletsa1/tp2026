@@ -14,13 +14,10 @@ public:
     virtual std::string getName() const = 0;
     virtual void move(const double& factorX, const double& factorY) = 0;
     virtual void scale(const double& factor) = 0;
-    virtual void putInComposite(std::unique_ptr<Shape>)
-    {
-        return;
-    }
-    virtual void printInfoComposite()
-    {
-        return;
-    }
+
+    virtual double getMinX() const = 0;
+    virtual double getMaxX() const = 0;
+    virtual double getMinY() const = 0;
+    virtual double getMaxY() const = 0;
 };
 #endif

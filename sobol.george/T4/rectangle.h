@@ -11,7 +11,8 @@ protected:
     Point botLet;
     Point topRit;
 public:
-    Rectangle(const Point& bl, const Point& tr) : botLet(bl), topRit(tr) {}
+    Rectangle(const Point& bl, const Point& tr) : botLet(bl), topRit(tr) 
+    {}
     Rectangle(const double& blX, const double& blY, const double& trX, const double& trY)
     {
         botLet.x = blX;
@@ -20,10 +21,7 @@ public:
         topRit.y = trY;
     }
     ~Rectangle() override
-    {
-        botLet.~Point();
-        topRit.~Point();
-    }
+    {}
 
     double getArea() const override
     {
@@ -52,6 +50,22 @@ public:
         botLet.y = center.y + (botLet.y - center.y) * factor;
         topRit.x = center.x + (topRit.x - center.x) * factor;
         topRit.y = center.y + (topRit.y - center.y) * factor;
+    }
+    double getMinX() const override
+    {
+        return botLet.x;
+    }
+    double getMaxX() const override
+    {
+        return topRit.x;
+    }
+    double getMinY() const override
+    {
+        return botLet.y;
+    }
+    double getMaxY() const override
+    {
+        return topRit.y;
     }
 };
 

@@ -11,8 +11,10 @@ private:
     Point botLet;
     double length;
 public:
-    Square(const Point& tl, const double& l) : botLet(tl), length(l) {}
-    ~Square() override { botLet.~Point(); }
+    Square(const Point& tl, const double& l) : botLet(tl), length(l) 
+    {}
+    ~Square() override 
+    {}
     double getArea() const override
     {
         return length * length;
@@ -36,6 +38,22 @@ public:
         botLet.x = center.x + (botLet.x - center.x) * factor;
         botLet.y = center.y + (botLet.y - center.y) * factor;
         length *= factor;
+    }
+    double getMinX() const override
+    {
+        return botLet.x;
+    }
+    double getMaxX() const override
+    {
+        return botLet.x + length;
+    }
+    double getMinY() const override
+    {
+        return botLet.y;
+    }
+    double getMaxY() const override
+    {
+        return botLet.y + length;
     }
 };
 

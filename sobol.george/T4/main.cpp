@@ -18,7 +18,14 @@ void printInfo(const std::vector<std::unique_ptr<Shape>>& shapes)
         {
             std::cout << "[" << shapes[i]->getName() << ", (" << shapes[i]->getCenter().x
                 << ", " << shapes[i]->getCenter().y << "), " << shapes[i]->getArea() << ":\n";
-            shapes[i]->printInfoComposite();
+            CompositeShape* composite = dynamic_cast<CompositeShape*>(shapes[i].get());
+            for (size_t j = 0; j < composite->membersAccess().size(); j++)
+            {
+                std::cout << '\t' << composite->membersAccess()[j]->getName() << ", " << "(" 
+                    << composite->membersAccess()[j]->getCenter().x << ", "
+                    << composite->membersAccess()[j]->getCenter().y << "), "
+                    << composite->membersAccess()[j]->getArea() << ",\n";
+            }
             std::cout << "]\n";
         }
     }
@@ -35,7 +42,7 @@ int main()
     std::unique_ptr<Shape> lanino = std::make_unique<Rectangle>(Point(-3.0, -3.0), Point(0.0, 5.0));
     std::unique_ptr<Shape> rouxls = std::make_unique<Rectangle>(Point(5.0, -2.0), Point(7.0, 1.0));
     std::unique_ptr<Shape> elnina = std::make_unique<Ellipse>(Point(3.0, 3.0), 8.0, 6.0);
-    std::unique_ptr<Shape> trifecta = std::make_unique<CompositeShape>();
+    auto trifecta = std::make_unique<CompositeShape>();
 
     trifecta->putInComposite(std::move(lanino));
     trifecta->putInComposite(std::move(rouxls));

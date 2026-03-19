@@ -12,11 +12,10 @@ protected:
     double radiusX;
     double radiusY;
 public:
-    Ellipse(const Point& c, double rX, double rY) : center(c), radiusX(rX), radiusY(rY) {}
+    Ellipse(const Point& c, double rX, double rY) : center(c), radiusX(rX), radiusY(rY) 
+    {}
     ~Ellipse() override
-    {
-        center.~Point();
-    }
+    {}
     double getArea() const override
     {
         return 3.14159 * radiusX * radiusY;
@@ -35,6 +34,22 @@ public:
     {
         radiusX *= factor;
         radiusY *= factor;
+    }
+    double getMinX() const override
+    {
+        return center.x - radiusX;
+    }
+    double getMaxX() const override
+    {
+        return center.x + radiusX;
+    }
+    double getMinY() const override
+    {
+        return center.y - radiusY;
+    }
+    double getMaxY() const override
+    {
+        return center.y + radiusY;
     }
 };
 
