@@ -5,7 +5,7 @@
 Square::Square(const Point& bottomLeft, double sideLength)
 : bottomLeft_(bottomLeft), side_(sideLength) {
 
-if (sideLength <= 0) {
+if (sideLength < 0) {
 throw std::invalid_argument("Error: The zoom level should be positive..");
 }
 }
@@ -25,7 +25,7 @@ bottomLeft_.y += dy;
 }
 
 void Square::scale(double factor) {
-if (factor <= 0) {
+if (factor < 0) {
 throw std::invalid_argument("Error: The zoom level should be positive..");
 }
 

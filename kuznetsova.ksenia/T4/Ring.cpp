@@ -2,6 +2,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <string>
+#include <memory>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -10,14 +11,17 @@
 Ring::Ring(const Point& center, double outRad, double inRad)
 : center_(center), outR_(outRad), inR_(inRad) {
 
-if (outR_ <= 0 || inR_ <= 0) {
-throw std::invalid_argument("Ошибка: Радиусы кольца должны быть положительными.");
+data = std::make_unique<SomeDataStructure>();
+
+if (outR_ <= 0 || inR_ < 0) {
+throw std::invalid_argument("Invalid radii values.");
 }
 
 if (outR_ <= inR_) {
-throw std::invalid_argument("Ошибка: Внешний радиус должен быть больше внутреннего.");
+throw std::invalid_argument("Outer radius must be greater than inner radius.");
 }
 }
+
 
 double Ring::getArea() const {
 return M_PI * (outR_ * outR_ - inR_ * inR_);
@@ -34,14 +38,14 @@ center_.y += dy;
 
 void Ring::scale(double factor) {
 if (factor <= 0) {
-throw std::invalid_argument("Ошибка: Коэффициент масштабирования должен быть положительным.");
+throw std::invalid_argument("Scale factor must be positive.");
 }
 
 double newOutR = outR_ * factor;
 double newInR = inR_ * factor;
 
 if (newOutR <= newInR) {
-throw std::invalid_argument("Ошибка: Масштабирование нарушает соотношение радиусов.");
+throw std::invalid_argument("Scaling violates radii ratio.");
 }
 
 outR_ = newOutR;

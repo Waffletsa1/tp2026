@@ -33,8 +33,8 @@ topRight.y += dy;
 }
 
 void Rectangle::scale(double factor) {
-if (factor <= 0) {
-throw std::invalid_argument("Error: The zoom level should be positive..");
+if (factor < 0) {
+throw std::invalid_argument("Error:Scale factor must be positive.");
 }
 
 Point center = getCenter();
