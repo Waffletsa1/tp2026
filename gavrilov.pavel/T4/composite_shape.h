@@ -20,7 +20,7 @@ public:
 
     virtual ~CompositeShape() = default;
 
-    void addShape(Shape* shape);
+    void addShape(std::unique_ptr<Shape> shape);
 
     double getArea() const override;
     Point getCenter() const override;
