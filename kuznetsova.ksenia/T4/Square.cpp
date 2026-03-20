@@ -1,7 +1,14 @@
 #include "Square.h"
+#include "Point.h"
+#include <stdexcept>
+#include <string>
 
 Square::Square(const Point& bottomLeft, double sideLength)
     : bottomLeft_(bottomLeft), side_(sideLength) {
+
+    if (sideLength <= 0) {
+        throw std::invalid_argument("Error: Square side length must be positive.");
+    }
 }
 
 double Square::getArea() const {
@@ -9,8 +16,8 @@ double Square::getArea() const {
 }
 
 Point Square::getCenter() const {
-    return Point(bottomLeft_.x + side_ / 2,
-        bottomLeft_.y + side_ / 2);
+    return Point(bottomLeft_.x + side_ / 2.0,
+        bottomLeft_.y + side_ / 2.0);
 }
 
 void Square::move(double dx, double dy) {
@@ -19,10 +26,14 @@ void Square::move(double dx, double dy) {
 }
 
 void Square::scale(double factor) {
+    if (factor <= 0) {
+        throw std::invalid_argument("Error: Scale factor must be positive.");
+    }
+
     Point center = getCenter();
     side_ *= factor;
-    bottomLeft_.x = center.x - side_ / 2;
-    bottomLeft_.y = center.y - side_ / 2;
+    bottomLeft_.x = center.x - side_ / 2.0;
+    bottomLeft_.y = center.y - side_ / 2.0;
 }
 
 std::string Square::getName() const {
