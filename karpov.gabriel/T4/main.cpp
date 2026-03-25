@@ -19,21 +19,21 @@ int main() {
     composite->addShape(std::make_unique<Circle>(Point(4, 3), 1));
     composite->addShape(std::make_unique<Rhombus>(Point(3, 5), 3, 4));
     shapes.push_back(std::move(composite));
+    double factorInput;
+    std::cin >> factorInput;
+    if (std::cin.fail()) {
+        if (std::cin.eof()) {
+            return 2;
+        } else {
+            std::cerr << "ERROR. Wrong data format\n";
+            return 1;
+        }
+    }
     std::cout << "before:" << std::endl;
     for (const auto& s : shapes) {
         Point c = s->getCenter();
         std::cout << "[" << s->getName() << ", (" << c.x << ", " << c.y << "), "
             << s->getArea() << "]" << std::endl;
-    }
-    double factorInput;
-    std::cin >> factorInput;
-    if (std::cin.fail()) {
-        if (std::cin.eof()) {
-            factorInput = 1.0;
-        } else {
-            std::cerr << "ERROR. Wrong data format\n";
-            return 1;
-        }
     }
     for (auto& s : shapes)
         s->scale(factorInput);
