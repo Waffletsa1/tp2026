@@ -6,6 +6,7 @@
 #include <limits>
 #include <cctype>
 #include <sstream>
+#include <utility>
 
 struct DataStruct {
     unsigned long long key1;
@@ -45,7 +46,8 @@ std::istream& operator>>(std::istream& in, UllLitIO&& dest) {
 
     std::string digits;
     int c = in.peek();
-    while (in && c != std::char_traits<char>::eof() && std::isdigit(static_cast<unsigned char>(c))) {
+    while (in && c != std::char_traits<char>::eof() &&
+           std::isdigit(static_cast<unsigned char>(c))) {
         digits.push_back(static_cast<char>(in.get()));
         c = in.peek();
     }
@@ -71,13 +73,16 @@ std::istream& operator>>(std::istream& in, UllLitIO&& dest) {
     in.get(s1);
     in.get(s2);
     in.get(s3);
-    if (in && std::tolower(static_cast<unsigned char>(s1)) == 'u' &&
+
+    if (in &&
+        std::tolower(static_cast<unsigned char>(s1)) == 'u' &&
         std::tolower(static_cast<unsigned char>(s2)) == 'l' &&
         std::tolower(static_cast<unsigned char>(s3)) == 'l') {
         dest.ref = value;
     } else {
         in.setstate(std::ios::failbit);
     }
+
     return in;
 }
 
@@ -93,16 +98,18 @@ std::istream& operator>>(std::istream& in, UllBinIO&& dest) {
     char p2 = '\0';
     in.get(p1);
     in.get(p2);
+
     if (!(in && p1 == '0' && std::tolower(static_cast<unsigned char>(p2)) == 'b')) {
         in.setstate(std::ios::failbit);
         return in;
     }
 
     unsigned long long value = 0;
-    bool has_digits = false;
+    bool hasDigits = false;
     int c = in.peek();
+
     while (in && c != std::char_traits<char>::eof() && (c == '0' || c == '1')) {
-        has_digits = true;
+        hasDigits = true;
         const unsigned digit = static_cast<unsigned>(in.get() - '0');
         if (value > (std::numeric_limits<unsigned long long>::max() - digit) / 2) {
             in.setstate(std::ios::failbit);
@@ -112,11 +119,12 @@ std::istream& operator>>(std::istream& in, UllBinIO&& dest) {
         c = in.peek();
     }
 
-    if (has_digits) {
+    if (hasDigits) {
         dest.ref = value;
     } else {
         in.setstate(std::ios::failbit);
     }
+
     return in;
 }
 
@@ -127,11 +135,13 @@ struct StringIO {
 std::istream& operator>>(std::istream& in, StringIO&& dest) {
     std::istream::sentry sentry(in, true);
     if (!sentry) return in;
+
     char c = '\0';
     in.get(c);
     if (in && c == '"' && std::getline(in, dest.ref, '"')) {
         return in;
     }
+
     in.setstate(std::ios::failbit);
     return in;
 }
@@ -139,16 +149,23 @@ std::istream& operator>>(std::istream& in, StringIO&& dest) {
 bool readKey(std::istream& in, std::string& key) {
     key.clear();
     int c = in.peek();
-    while (in && c != std::char_traits<char>::eof() &&
-           c != ' ' && c != ':' && c != '(' && c != ')' &&
+
+    while (in &&
+           c != std::char_traits<char>::eof() &&
+           c != ' ' &&
+           c != ':' &&
+           c != '(' &&
+           c != ')' &&
            !std::isspace(static_cast<unsigned char>(c))) {
         key.push_back(static_cast<char>(in.get()));
         c = in.peek();
     }
+
     if (key.empty()) {
         in.setstate(std::ios::failbit);
         return false;
     }
+
     return true;
 }
 
@@ -162,6 +179,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
     bool k3 = false;
 
     in >> DelimiterIO{'('} >> DelimiterIO{':'};
+
     for (int i = 0; i < 3 && in; ++i) {
         std::string key;
         if (!readKey(in, key)) {
@@ -203,14 +221,16 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
     }
 
     in >> DelimiterIO{')'};
+
     if (in && k1 && k2 && k3) {
         in >> std::ws;
-        if (in.peek() == std::char_traits<char>::eof()) {
+        if (in.eof()) {
             dest = std::move(temp);
         } else {
             in.setstate(std::ios::failbit);
         }
     }
+
     return in;
 }
 
@@ -222,7 +242,7 @@ std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
 
     unsigned long long k2 = src.key2;
     if (k2 == 0) {
-        out << "0";
+        out << '0';
     } else {
         std::string bin;
         while (k2 > 0) {
