@@ -11,13 +11,11 @@
 static void printShape(const Shape& s)
 {
     Point c = s.getCenter();
-    std::cout << std::fixed << std::setprecision(2);
     std::cout << "[" << s.getName() << ", (" << c.x << ", " << c.y << "), " << s.getArea() << "]" << std::endl;
 }
 static void printComposite(const CompositeShape& cs)
 {
     Point c = cs.getCenter();
-    std::cout << std::fixed << std::setprecision(2);
     std::cout << "[COMPOSITE, (" << c.x << ", " << c.y << "), " << cs.getArea() << ":" << std::endl;
     for (std::size_t i = 0; i < cs.size(); ++i) {
         const Shape& s = cs.getShape(i);
@@ -32,9 +30,10 @@ static void printComposite(const CompositeShape& cs)
 }
 int main()
 {
-    if (!(std::cin >> std::ws) || std::cin.eof()) {
+    if (!(std::cin >> std::ws)) {
         return 0;
     }
+    std::cout << std::fixed << std::setprecision(2);
     std::vector<std::unique_ptr<Shape>> shapes;
     shapes.push_back(std::make_unique<IsoscelesTrapezoid>(Point{ 0.0, 0.0 }, 6.0, 4.0, 2.0));
     shapes.push_back(std::make_unique<IsoscelesTrapezoid>(Point{ 1.0, 2.0 }, 4.0, 2.0, 2.0));
