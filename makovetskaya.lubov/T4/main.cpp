@@ -57,6 +57,11 @@ int main() {
     composite->addShape(std::make_shared<Rhombus>(Point(5, 3), 4, 3));
     shapes.push_back(composite);
 
+    for (const auto& shape : shapes) {
+        printShapeInfo(shape);
+        std::cout << "\n";
+    }
+
     double factor = 0.0;
     if (!(std::cin >> factor)) {
         std::cerr << "Error: no scale factor provided\n";
@@ -65,11 +70,6 @@ int main() {
     if (factor <= 0.0) {
         std::cerr << "Error: scale factor must be positive\n";
         return 1;
-    }
-
-    for (const auto& shape : shapes) {
-        printShapeInfo(shape);
-        std::cout << "\n";
     }
 
     for (auto& shape : shapes) {
