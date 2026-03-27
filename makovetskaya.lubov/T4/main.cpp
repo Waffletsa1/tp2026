@@ -44,48 +44,41 @@ void printShapeInfo(const std::shared_ptr<Shape>& shape, int indentLevel = 0) {
 }
 
 int main() {
-    try {
-        std::vector<std::shared_ptr<Shape>> shapes;
+    std::vector<std::shared_ptr<Shape>> shapes;
 
-        shapes.push_back(std::make_shared<Rectangle>(Point(0, 0), Point(4, 3)));
-        shapes.push_back(std::make_shared<Ring>(Point(2, 2), 5, 3));
-        shapes.push_back(std::make_shared<Rhombus>(Point(-1, 1), 6, 4));
-        shapes.push_back(std::make_shared<Ring>(Point(-2, -2), 3, 1.5));
+    shapes.push_back(std::make_shared<Rectangle>(Point(0, 0), Point(4, 3)));
+    shapes.push_back(std::make_shared<Ring>(Point(2, 2), 5, 3));
+    shapes.push_back(std::make_shared<Rhombus>(Point(-1, 1), 6, 4));
+    shapes.push_back(std::make_shared<Ring>(Point(-2, -2), 3, 1.5));
 
-        auto composite = std::make_shared<CompositeShape>();
-        composite->addShape(std::make_shared<Rectangle>(Point(2, 2), Point(4, 4)));
-        composite->addShape(std::make_shared<Ring>(Point(4, 4), 2, 1));
-        composite->addShape(std::make_shared<Rhombus>(Point(5, 3), 4, 3));
-        shapes.push_back(composite);
+    auto composite = std::make_shared<CompositeShape>();
+    composite->addShape(std::make_shared<Rectangle>(Point(2, 2), Point(4, 4)));
+    composite->addShape(std::make_shared<Ring>(Point(4, 4), 2, 1));
+    composite->addShape(std::make_shared<Rhombus>(Point(5, 3), 4, 3));
+    shapes.push_back(composite);
 
-        double factor = 0.0;
-        if (!(std::cin >> factor)) {
-            std::cerr << "Error: no scale factor provided\n";
-            return 1;
-        }
-        if (factor <= 0.0) {
-            std::cerr << "Error: scale factor must be positive\n";
-            return 1;
-        }
-
-        for (const auto& shape : shapes) {
-            printShapeInfo(shape);
-            std::cout << "\n";
-        }
-
-        for (auto& shape : shapes) {
-            shape->scale(factor);
-        }
-
-        for (const auto& shape : shapes) {
-            printShapeInfo(shape);
-            std::cout << "\n";
-        }
-
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+    double factor = 0.0;
+    if (!(std::cin >> factor)) {
+        std::cerr << "Error: no scale factor provided\n";
         return 1;
+    }
+    if (factor <= 0.0) {
+        std::cerr << "Error: scale factor must be positive\n";
+        return 1;
+    }
+
+    for (const auto& shape : shapes) {
+        printShapeInfo(shape);
+        std::cout << "\n";
+    }
+
+    for (auto& shape : shapes) {
+        shape->scale(factor);
+    }
+
+    for (const auto& shape : shapes) {
+        printShapeInfo(shape);
+        std::cout << "\n";
     }
 
     return 0;
