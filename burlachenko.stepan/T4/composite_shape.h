@@ -15,6 +15,7 @@ public:
 
     void addShape(const std::shared_ptr<Shape>& shape);
 
+    std::string getDescription() const;
     double getArea() const override;
     Point getCenter() const override;
     void move(const Point& newCenter) override;

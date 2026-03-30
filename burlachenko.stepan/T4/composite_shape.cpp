@@ -1,5 +1,7 @@
 #include "composite_shape.h"
 #include <stdexcept>
+#include <sstream>
+#include <iomanip>
 
 void CompositeShape::addShape(const std::shared_ptr<Shape>& shape)
 {
@@ -121,5 +123,29 @@ void CompositeShape::scale(double ratio)
 
 std::string CompositeShape::getName() const
 {
-    return "CompositeShape";
+    return "COMPOSITE";
+}
+
+std::string CompositeShape::getDescription() const
+{
+    std::ostringstream oss;
+    Point center = getCenter();
+    oss << std::fixed << std::setprecision(2);
+    oss << "[COMPOSITE, (" << center.x << ", " << center.y << "), " << getArea() << ":\n";
+    
+    for (size_t i = 0; i < shapes_.size(); i++)
+    {
+        Point c = shapes_[i]->getCenter();
+        oss << "  " << shapes_[i]->getName()
+            << ", (" << c.x << ", " << c.y << "), " << shapes_[i]->getArea();
+
+        if (i + 1 < shapes_.size())
+        {
+            oss << ",";
+        }
+
+        oss << "\n";
+    }
+    oss << "]";
+    return oss.str();
 }
