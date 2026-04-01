@@ -7,18 +7,18 @@
 
 class Rectangle:public Shape{
 public:
-Rectangle(constPoint&p1,constPoint&p2);
+	Rectangle(const Point&p1,const Point&p2);
 
-doublegetArea()constoverride;
-PointgetCenter()constoverride;
-voidmove(doubledx,doubledy)override;
-voidscale(doublefactor)override;
-std::stringgetName()constoverride;
-std::unique_ptr<Shape>clone()constoverride;
+	double getArea()constoverride;
+	Point getCenter()constoverride;
+	void move(double dx,double dy)override;
+	void scale(double factor)override;
+	std::string getName()constoverride;
+	std::unique_ptr<Shape>clone()constoverride;
 
 private:
-PointbottomLeft_;
-PointtopRight_;
+	Point bottomLeft_;
+	Point topRight_;
 };
 
 #endif

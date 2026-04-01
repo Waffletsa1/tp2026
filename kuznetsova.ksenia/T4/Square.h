@@ -7,18 +7,18 @@
 
 class Square: public Shape{
 public:
-Square(constPoint&bottomLeft,doubleside);
+	Square(const Point&bottomLeft,double side);
 
-doublegetArea()constoverride;
-PointgetCenter()constoverride;
-voidmove(doubledx,doubledy)override;
-voidscale(doublefactor)override;
-std::stringgetName()constoverride;
-std::unique_ptr<Shape>clone()constoverride;
+	double getArea()const override;
+	Point getCenter()const override;
+	void move(double dx,double dy)override;
+	void scale(double factor)override;
+	std::string getName()const override;
+	std::unique_ptr<Shape>clone()const override;
 
 private:
-PointbottomLeft_;
-doubleside_;
+	Point bottomLeft_;
+	double side_;
 };
 
 #endif
