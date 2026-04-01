@@ -118,9 +118,7 @@ void testComposite() {
 
     double oldAreaComp = composite->getArea();
 
-    double factor;
-    std::cout << "Enter scale factor: ";
-    std::cin >> factor;
+    const double factor = 2.0;
 
     composite->scale(factor);
     std::cout << "After scale(" << factor << "): area = " << composite->getArea() << "\n";
