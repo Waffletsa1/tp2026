@@ -67,8 +67,8 @@ const std::vector<std::unique_ptr<Shape>>& CompositeShape::getShapes() const {
 }
 
 void CompositeShape::print(std::ostream& stream) const {
-    stream << std::fixed << std::setprecision(2) << "[COMPOSITE, (" << 
-        this->getCenter().x_ << ", " << this->getCenter().y_ << "), " << 
+    stream << std::fixed << std::setprecision(2) << "[COMPOSITE, (" <<
+        this->getCenter().x_ << ", " << this->getCenter().y_ << "), " <<
         this->getArea() << ":";
     for (const auto& s : shapes_) {
         stream << "\n " << s->getName();
