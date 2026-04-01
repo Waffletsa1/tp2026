@@ -1,4 +1,6 @@
 #include "CompositeShape.h"
+#include "Shape.h"
+#include <memory>
 #include <limits>
 #include <iomanip>
 

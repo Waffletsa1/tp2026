@@ -11,4 +11,4 @@ struct Point {
     ~Point() = default;
 };
 
-#endif // !POINT_H
+#endif

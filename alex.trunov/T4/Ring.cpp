@@ -1,4 +1,8 @@
-#include "Ring.h"
+#include <iostream>
+#include <string>
+#include "Point.h"
+#include "Shape.h"
+#include "Rectangle.h"
 
 double Ring::getArea() const {
     double sq = 3.1415 * (maxRad_ * maxRad_ - minRad_ * minRad_);

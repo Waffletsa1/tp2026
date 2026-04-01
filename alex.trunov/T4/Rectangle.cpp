@@ -1,4 +1,6 @@
-#include "Rectangle.h"
+#include <iostream>
+#include <string>
+#include "Shape.h"
 
 double Rectangle::getArea() const {
     double widgh = std::abs(topRight_.x_ - bottomLeft_.x_);
