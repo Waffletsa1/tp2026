@@ -37,14 +37,23 @@ std::string extractValue(const std::string& line, const std::string& key) {
     size_t pos = line.find(search);
     if (pos == std::string::npos) return "";
     pos += search.length();
-    size_t end = line.find(':', pos);
-    if (end == std::string::npos) return "";
-    return line.substr(pos, end - pos);
+
+    if (pos < line.size() && line[pos] == '"') {
+        size_t end = line.find('"', pos + 1);
+        if (end == std::string::npos) return "";
+        return line.substr(pos, end - pos + 1);
+    }
+    else {
+        size_t end = line.find(':', pos);
+        if (end == std::string::npos) return "";
+        return line.substr(pos, end - pos);
+    }
 }
 
 std::istream& operator>>(std::istream& in, DataStruct& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
+
     std::string line;
     while (std::getline(in, line)) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
