@@ -7,227 +7,231 @@
 #include <cmath>
 #include <limits>
 #include <complex>
+#include <sstream>
 
 namespace nspace {
-const double EPS = 1e-9;
-struct DataStruct {
-unsigned long long key1 = 0;
-std::complex<double> key2{ 0.0, 0.0 };
-std::string key3;
-};
+    const double EPS = 1e-9;
 
-struct DelimiterIO {
-char exp;
-};
+    struct DataStruct {
+        unsigned long long key1 = 0;
+        std::complex<double> key2{ 0.0, 0.0 };
+        std::string key3;
+    };
 
-struct KeyIO {
-int& ref;
-};
+    std::istream& parseNumber(std::istream& in, unsigned long long& dest) {
+        std::string token;
+        in >> token;
 
-struct UllHexIO {
-unsigned long long& ref;
-};
+        if (token.empty()) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-struct CmpLspIO {
-std::complex<double>& ref;
-};
+        std::string numStr = token;
+        if (token.back() == 'd') {
+            numStr = token.substr(0, token.length() - 1);
+        }
+        else if (token.length() >= 2 && token.substr(token.length() - 2) == "ll") {
+            numStr = token.substr(0, token.length() - 2);
+        }
+        else if (token.length() >= 3 && token.substr(token.length() - 3) == "ull") {
+            numStr = token.substr(0, token.length() - 3);
+        }
 
-std::istream& operator>>(std::istream& in, KeyIO&& dest) {
-std::istream::sentry sentry(in);
-if (!sentry) return in;
-char k, e, y, n;
-in >> k >> e >> y >> n;
-if (in && (k != 'k' || e != 'e' || y != 'y' || !(n >= '1' && n <= '3'))) {
-in.setstate(std::ios::failbit);
-}
-else {
-dest.ref = n - '0';
-}
+        std::istringstream iss(numStr);
+        unsigned long long value;
+        if (!(iss >> value)) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-return in;
-}
+        dest = value;
+        return in;
+    }
 
-std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
-std::istream::sentry sentry(in);
-if (!sentry) return in;
-char c;
-in >> c;
-if (in && std::tolower(c) != std::tolower(dest.exp)) {
-in.setstate(std::ios::failbit);
-}
-return in;
-}
+    std::istream& parseComplex(std::istream& in, std::complex<double>& dest) {
+        char hash, c, open;
+        in >> hash >> c >> open;
 
-std::istream& operator>>(std::istream& in, UllHexIO&& dest) {
-std::istream::sentry sentry(in);
-if (!sentry) return in;
+        if (hash != '#' || c != 'c' || open != '(') {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-char prefix1, prefix2;
-in >> prefix1 >> prefix2;
-if (prefix1 != '0' || (prefix2 != 'x' && prefix2 != 'X')) {
-in.setstate(std::ios::failbit);
-return in;
-}
+        double real, imag;
+        if (!(in >> real >> imag)) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-unsigned long long value;
-if (!(in >> std::hex >> value)) {
-in.setstate(std::ios::failbit);
-return in;
-}
-in >> std::dec;
+        char close;
+        in >> close;
+        if (close != ')') {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-char colon;
-in >> colon;
-if (colon != ':') {
-in.setstate(std::ios::failbit);
-}
-else {
-dest.ref = value;
-}
-return in;
-}
+        dest = std::complex<double>(real, imag);
+        return in;
+    }
 
-std::istream& operator>>(std::istream& in, CmpLspIO&& dest) {
-std::istream::sentry sentry(in);
-if (!sentry) return in;
+    std::istream& parseQuotedString(std::istream& in, std::string& dest) {
+        char quote;
+        in >> quote;
 
-char hash, c, open, close, colon;
-double real, imag;
+        if (quote != '"') {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-in >> hash >> c >> open;
-if (hash != '#' || c != 'c' || open != '(') {
-in.setstate(std::ios::failbit);
-return in;
-}
+        std::getline(in, dest, '"');
+        return in;
+    }
 
-if (!(in >> real >> imag)) {
-in.setstate(std::ios::failbit);
-return in;
-}
+    std::istream& operator>>(std::istream& in, DataStruct& dest) {
+        std::istream::sentry sentry(in);
+        if (!sentry) return in;
 
-in >> close >> colon;
-if (close != ')' || colon != ':') {
-in.setstate(std::ios::failbit);
-return in;
-}
+        char openParen;
+        in >> openParen;
+        if (openParen != '(') {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-dest.ref = std::complex<double>(real, imag);
-return in;
-}
+        DataStruct input;
+        bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
 
-std::istream& operator>>(std::istream& in, DataStruct& dest) {
-std::istream::sentry sentry(in);
-if (!sentry) return in;
+        for (int i = 0; i < 3; i++) {
+            char colon;
+            in >> colon;
+            if (colon != ':') {
+                in.setstate(std::ios::failbit);
+                return in;
+            }
 
-DataStruct input;
+            std::string key;
+            in >> key;
 
-if (!(in >> DelimiterIO{ '(' } >> DelimiterIO{ ':' })) {
-return in;
-}
+            if (key == "key1") {
+                in >> colon;
+                if (colon != ':') {
+                    in.setstate(std::ios::failbit);
+                    return in;
+                }
+                parseNumber(in, input.key1);
+                hasKey1 = true;
+            }
+            else if (key == "key2") {
+                in >> colon;
+                if (colon != ':') {
+                    in.setstate(std::ios::failbit);
+                    return in;
+                }
+                char next;
+                in >> next;
+                in.putback(next);
 
-bool has[3] = { false, false, false };
+                if (next == '#') {
+                    parseComplex(in, input.key2);
+                }
+                else {
+                    unsigned long long dummy;
+                    parseNumber(in, dummy);
+                    input.key2 = std::complex<double>(static_cast<double>(dummy), 0.0);
+                }
+                hasKey2 = true;
+            }
+            else if (key == "key3") {
+                in >> colon;
+                if (colon != ':') {
+                    in.setstate(std::ios::failbit);
+                    return in;
+                }
+                parseQuotedString(in, input.key3);
+                hasKey3 = true;
+            }
+            else {
+                in.setstate(std::ios::failbit);
+                return in;
+            }
+        }
 
-for (int i = 0; i < 3 && in; i++) {
-int keyNum = 0;
-in >> KeyIO{ keyNum };
-if (!in) break;
+        char closeParen;
+        in >> closeParen;
+        if (closeParen != ')') {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
 
-in >> DelimiterIO{ ':' };
-if (!in) break;
+        if (hasKey1 && hasKey2 && hasKey3) {
+            dest = input;
+        }
+        else {
+            in.setstate(std::ios::failbit);
+        }
 
-if (keyNum == 1 && !has[0]) {
-in >> UllHexIO{ input.key1 };
-has[0] = true;
-}
-else if (keyNum == 2 && !has[1]) {
-in >> CmpLspIO{ input.key2 };
-has[1] = true;
-}
-else if (keyNum == 3 && !has[2]) {
-char quote;
-in >> quote;
-if (quote != '"') {
-in.setstate(std::ios::failbit);
-break;
-}
-std::getline(in, input.key3, '"');
-in >> DelimiterIO{ ':' };
-has[2] = true;
-}
-else {
-in.setstate(std::ios::failbit);
-break;
-}
-}
+        return in;
+    }
 
-if (in) {
-in >> DelimiterIO{ ')' };
-}
+    std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
+        out << "(:key1 " << src.key1;
 
-if (in && has[0] && has[1] && has[2]) {
-dest = input;
-}
-return in;
-}
+        if (std::abs(src.key2.imag()) < EPS && std::abs(src.key2.real() - static_cast<unsigned long long>(src.key2.real())) < EPS) {
+            out << ":key2 " << static_cast<unsigned long long>(src.key2.real()) << "d";
+        }
+        else {
+            out << ":key2 #c(" << std::fixed << std::setprecision(1)
+                << src.key2.real() << " " << src.key2.imag() << ")";
+        }
 
-std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
-std::ostream::sentry sentry(out);
-if (!sentry) return out;
+        out << ":key3 \"" << src.key3 << "\":)";
 
-out << "(:key1 0x" << std::hex << std::uppercase << src.key1 << std::dec << std::nouppercase;
+        return out;
+    }
 
-out << ":key2 #c(" << std::fixed << std::setprecision(1)
-<< src.key2.real() << " " << src.key2.imag() << ")";
+    bool compareData(const DataStruct& a, const DataStruct& b) {
+        if (a.key1 != b.key1) {
+            return a.key1 < b.key1;
+        }
 
-out << ":key3 \"" << src.key3 << "\":)";
+        double modA = std::abs(a.key2);
+        double modB = std::abs(b.key2);
+        if (std::abs(modA - modB) > EPS) {
+            return modA < modB;
+        }
 
-return out;
-}
-
-bool compareData(const DataStruct& a, const DataStruct& b) {
-if (a.key1 != b.key1) {
-return a.key1 < b.key1;
-}
-
-double modA = std::abs(a.key2);
-double modB = std::abs(b.key2);
-if (std::abs(modA - modB) > EPS) {
-return modA < modB;
-}
-
-return a.key3.length() < b.key3.length();
-}
+        return a.key3.length() < b.key3.length();
+    }
 }
 
 int main() {
-std::vector<nspace::DataStruct> data;
+    std::vector<nspace::DataStruct> data;
 
-while (std::cin) {
-std::copy(
-std::istream_iterator<nspace::DataStruct>(std::cin),
-std::istream_iterator<nspace::DataStruct>(),
-std::back_inserter(data)
-);
+    while (std::cin) {
+        nspace::DataStruct temp;
+        if (std::cin >> temp) {
+            data.push_back(temp);
+        }
+        else if (std::cin.eof()) {
+            break;
+        }
+        else {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
 
-if (std::cin.fail() && !std::cin.eof()) {
-std::cin.clear();
-std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-else if (std::cin.eof()) {
-break;
-}
-}
+    if (data.empty()) {
+        std::cerr << "Looks like there is no supported record. Cannot determine input. Test skipped" << std::endl;
+        return 1;
+    }
 
-if (data.empty()) {
-std::cerr << "Looks like there is no supported record. Cannot determine input. Test skipped" << std::endl;
-return 1;
-}
+    std::sort(data.begin(), data.end(), nspace::compareData);
 
-std::sort(data.begin(), data.end(), nspace::compareData);
+    for (const auto& item : data) {
+        std::cout << item << "\n";
+    }
 
-std::copy(
-data.begin(),
-data.end(),
-std::ostream_iterator<nspace::DataStruct>(std::cout, "\n")
-);
+    return 0;
 }
