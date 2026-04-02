@@ -7,11 +7,13 @@
 #include <iomanip>
 #include <limits>
 
+
 struct DataStruct {
     double key1;
     long long key2;
     std::string key3;
 };
+
 
 struct DelimiterIO {
     char expected;
@@ -30,6 +32,7 @@ std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
     return in;
 }
 
+
 struct KeyIO {
     std::string& ref;
 };
@@ -46,6 +49,7 @@ std::istream& operator>>(std::istream& in, KeyIO&& dest) {
     }
     return in;
 }
+
 
 struct StringIO {
     std::string& ref;
@@ -64,6 +68,7 @@ std::istream& operator>>(std::istream& in, StringIO&& dest) {
     std::getline(in, dest.ref, '"');
     return in;
 }
+
 
 struct DoubleSciIO {
     double& ref;
@@ -100,6 +105,7 @@ std::istream& operator>>(std::istream& in, DoubleSciIO&& dest) {
 
     return in;
 }
+
 
 struct LongLongIO {
     long long& ref;
@@ -144,6 +150,7 @@ std::istream& operator>>(std::istream& in, LongLongIO&& dest) {
 
     return in;
 }
+
 
 std::istream& operator>>(std::istream& in, DataStruct& dest) {
     std::istream::sentry sentry(in);
@@ -196,8 +203,8 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
         }
     }
 
-    char closeParen;
-    if (!(in >> closeParen) || closeParen != ')') {
+    char closeBracket;
+    if (!(in >> closeBracket) || closeBracket != ')') {
         in.setstate(std::ios::failbit);
         return in;
     }
@@ -269,6 +276,7 @@ int main() {
     std::copy(
         std::begin(data),
         std::end(data),
-        std::ostream_iterator<DataStruct>(std::cout, "\n"));
+        std::ostream_iterator<DataStruct>(std::cout, "\n")
+    );
     return 0;
 }
