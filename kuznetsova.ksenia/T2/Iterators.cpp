@@ -20,6 +20,9 @@ bool parseHexULL(const std::string& str, unsigned long long& value) {
     if (str.empty() || str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
         return false;
     }
+    if (str.length() < 3) {
+        return false;
+    }
     for (size_t i = 2; i < str.length(); ++i) {
         char c = str[i];
         if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
@@ -141,8 +144,8 @@ std::ostream& operator<<(std::ostream& os, const DataStruct& data) {
     os << ":key2 #c(";
     os << std::fixed << std::setprecision(1);
     os << data.key2.real() << " " << data.key2.imag();
-    os << std::defaultfloat << ")";
-    os << ":key3 \"" << data.key3 << "\":)";
+    os << std::defaultfloat << "):";
+    os << "key3 \"" << data.key3 << "\":)";
     return os;
 }
 
