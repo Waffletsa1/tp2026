@@ -1,13 +1,11 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <iterator>
 #include <algorithm>
 #include <iomanip>
-#include <limits>
-#include <sstream>
-#include <cctype>
-#include <cmath>
+
 
 struct DataStruct {
     double key1;
@@ -123,19 +121,26 @@ std::istream& operator>>(std::istream& in, LongLongIO&& dest) {
     in.putback(':');
 
     if (temp.size() >= 2) {
-        char last = temp.back();
-        char secondLast = temp[temp.size() - 2];
-        if ((last == 'l' || last == 'L') && (secondLast == 'l' || secondLast == 'L')) {
+        char last = std::tolower(temp.back());
+        char secondLast = std::tolower(temp[temp.size() - 2]);
+        if (last == 'l' && secondLast == 'l') {
             temp.pop_back();
             temp.pop_back();
             try {
                 dest.ref = std::stoll(temp);
                 return in;
             }
-            catch (...) {}
+            catch (...) {
+                in.setstate(std::ios::failbit);
+            }
+        }
+        else {
+            in.setstate(std::ios::failbit);
         }
     }
-    in.setstate(std::ios::failbit);
+    else {
+        in.setstate(std::ios::failbit);
+    }
 
     return in;
 }
@@ -152,13 +157,19 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
         return in;
     }
 
-    if (!(in >> DelimiterIO{':'})) {
+    char firstColon;
+    if (!(in >> firstColon) || firstColon != ':') {
+        in.setstate(std::ios::failbit);
         return in;
     }
 
     for (int i = 0; i < 3; ++i) {
         std::string key;
         in >> KeyIO{key};
+
+        if (!in) {
+            return in;
+        }
 
         if (key == "key1") {
             in >> DoubleSciIO{temp.key1};
@@ -174,19 +185,24 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
             break;
         }
 
-        if (i < 2) {
-            in >> DelimiterIO{':'};
-            if (!in) {
-                break;
-            }
+        if (!in) {
+            return in;
+        }
+
+        char colon;
+        if (!(in >> colon) || colon != ':') {
+            in.setstate(std::ios::failbit);
+            return in;
         }
     }
 
-    in >> DelimiterIO{':'};
-    if (in >> DelimiterIO{')'}) {
-        dest = temp;
+    char closeParen;
+    if (!(in >> closeParen) || closeParen != ')') {
+        in.setstate(std::ios::failbit);
+        return in;
     }
 
+    dest = temp;
     return in;
 }
 
