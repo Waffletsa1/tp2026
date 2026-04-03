@@ -45,86 +45,114 @@ private:
 std::istream& operator>>(std::istream& in, DataStruct& dest)
 {
     std::istream::sentry sentry(in);
-    if (!sentry) return in;
-
-    std::string line;
-    while (std::getline(in, line))
+    if (!sentry)
     {
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        if (line.size() < 4 || line[0] != '(' || line[1] != ':' ||
-            line[line.size() - 2] != ':' || line[line.size() - 1] != ')')
-            continue;
-
-        std::istringstream iss(line);
-        char dummy;
-        iss >> dummy;
-        iss >> dummy;
-
-        DataStruct temp;
-        bool f1 = false, f2 = false, f3 = false;
-        std::string key;
-        bool valid = true;
-
-        while (iss >> std::ws && !iss.eof() && valid)
-        {
-            iss >> dummy;
-            iss >> key;
-
-            if (key == "key1" && !f1)
-            {
-                double val; char suf;
-                if (!(iss >> val >> suf) || (suf != 'd' && suf != 'D'))
-                {
-                    valid = false;
-                }
-                else
-                {
-                    temp.key1 = val;
-                    f1 = true;
-                }
-            }
-            else if (key == "key2" && !f2)
-            {
-                unsigned long long val; std::string suf;
-                if (!(iss >> val >> suf))
-                {
-                    valid = false;
-                }
-                else
-                {
-                    for (char& c : suf) c = std::tolower(static_cast<unsigned char>(c));
-                    if (suf != "ull") valid = false;
-                    else { temp.key2 = val; f2 = true; }
-                }
-            }
-            else if (key == "key3" && !f3)
-            {
-                char quote; std::string val;
-                if (!(iss >> quote) || quote != '"')
-                {
-                    valid = false;
-                }
-                else
-                {
-                    std::getline(iss, val, '"');
-                    temp.key3 = val;
-                    f3 = true;
-                }
-            }
-            else
-            {
-                valid = false;
-            }
-        }
-
-        if (valid && f1 && f2 && f3)
-        {
-            dest = temp;
-            return in;
-        }
+        return in;
     }
 
-    in.setstate(std::ios::failbit);
+    iofmtguard fmtguard(in);
+
+    char ch = 0;
+    std::string key;
+
+    in >> ch;
+    if (ch != '(')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> ch;
+    if (ch != ':')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> key;
+    if (key != "key1")
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    double val1;
+    char suffix;
+    in >> val1 >> suffix;
+    if (suffix != 'd' && suffix != 'D')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> ch;
+    if (ch != ':')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> key;
+    if (key != "key2")
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    unsigned long long val2;
+    std::string suffix2;
+    in >> val2 >> suffix2;
+
+    for (char& c : suffix2)
+        c = std::tolower(static_cast<unsigned char>(c));
+
+    if (suffix2 != "ull")
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> ch;
+    if (ch != ':')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> key;
+    if (key != "key3")
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    char quote;
+    in >> quote;
+    if (quote != '"')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    std::string val3;
+    std::getline(in, val3, '"');
+    in >> ch;
+    if (ch != ':')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    in >> ch;
+    if (ch != ')')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    dest.key1 = val1;
+    dest.key2 = val2;
+    dest.key3 = val3;
+
     return in;
 }
 
