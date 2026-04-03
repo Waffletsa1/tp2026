@@ -4,9 +4,7 @@
 #include <algorithm>
 #include <iterator>
 #include <iomanip>
-#include <limits>
 #include <cctype>
-#include <cmath>
 #include <sstream>
 
 struct DataStruct {
@@ -15,28 +13,17 @@ struct DataStruct {
     std::string key3;
 };
 
-struct DelimiterIO {
-    char expected;
-};
-
-struct DoubleScientificIO {
-    double& value;
-};
-
-struct UnsignedBinaryIO {
-    unsigned long long& value;
-};
-
-struct StringIO {
-    std::string& value;
-};
+struct DelimiterIO { char expected; };
+struct DoubleScientificIO { double& value; };
+struct UnsignedBinaryIO { unsigned long long& value; };
+struct StringIO { std::string& value; };
 
 std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
     char c;
     in >> std::ws >> c;
-    if (in && std::tolower(c) != std::tolower(dest.expected)) {
+    if (in && std::tolower(static_cast<unsigned char>(c)) != std::tolower(static_cast<unsigned char>(dest.expected))) {
         in.setstate(std::ios::failbit);
     }
     return in;
@@ -47,14 +34,43 @@ std::istream& operator>>(std::istream& in, DoubleScientificIO&& dest) {
     if (!sentry) return in;
     std::string token;
     if (!(in >> token)) return in;
-    bool hasExp = (token.find('e') != std::string::npos || token.find('E') != std::string::npos);
-    if (!hasExp) {
+
+    size_t ePos = token.find_first_of("eE");
+    if (ePos == std::string::npos || ePos == 0 || ePos == token.size() - 1) {
         in.setstate(std::ios::failbit);
         return in;
     }
+    std::string mantissa = token.substr(0, ePos);
+    std::string exponent = token.substr(ePos + 1);
+
+    size_t dotPos = mantissa.find('.');
+    if (dotPos == std::string::npos || dotPos == 0 || dotPos == mantissa.size() - 1) {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    for (size_t i = 0; i < mantissa.size(); ++i) {
+        if (i != dotPos && !std::isdigit(static_cast<unsigned char>(mantissa[i]))) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+    }
+
+    size_t expStart = 0;
+    if (!exponent.empty() && (exponent[0] == '+' || exponent[0] == '-')) expStart = 1;
+    if (expStart >= exponent.size()) {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    for (size_t i = expStart; i < exponent.size(); ++i) {
+        if (!std::isdigit(static_cast<unsigned char>(exponent[i]))) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+    }
     try {
         dest.value = std::stod(token);
-    } catch (...) {
+    }
+    catch (...) {
         in.setstate(std::ios::failbit);
     }
     return in;
@@ -64,19 +80,31 @@ std::istream& operator>>(std::istream& in, UnsignedBinaryIO&& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
     char c1, c2;
-    if (!(in >> c1 >> c2) || c1 != '0' || std::tolower(c2) != 'b') {
+    if (!(in >> c1 >> c2) || c1 != '0' || std::tolower(static_cast<unsigned char>(c2)) != 'b') {
         in.setstate(std::ios::failbit);
         return in;
     }
-    std::string binaryDigits;
+    std::string bin;
     char ch;
-    while (in >> ch && (ch == '0' || ch == '1')) {
-        binaryDigits += ch;
+    while (in.get(ch)) {
+        if (ch == '0' || ch == '1') {
+            bin += ch;
+        }
+        else {
+            in.putback(ch);
+            break;
+        }
     }
-    if (!binaryDigits.empty() || in) {
-        in.putback(ch);
+    if (bin.empty()) {
+        in.setstate(std::ios::failbit);
+        return in;
     }
-    dest.value = binaryDigits.empty() ? 0 : std::stoull(binaryDigits, nullptr, 2);
+    try {
+        dest.value = std::stoull(bin, nullptr, 2);
+    }
+    catch (...) {
+        in.setstate(std::ios::failbit);
+    }
     return in;
 }
 
@@ -96,33 +124,56 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
     DataStruct input;
-    if (!(in >> DelimiterIO{'('})) return in;
+    if (!(in >> DelimiterIO{ '(' } >> DelimiterIO{ ':' })) return in;
+
     bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
-    while (in.good()) {
-        DelimiterIO colon{':'};
+    while (true) {
         std::string label;
-        if (!(in >> colon >> label)) break;
+        if (!(in >> label)) {
+            in.setstate(std::ios::failbit);
+            break;
+        }
         if (label == "key1") {
             if (hasKey1) { in.setstate(std::ios::failbit); break; }
-            in >> DoubleScientificIO{input.key1};
+            in >> DoubleScientificIO{ input.key1 };
             hasKey1 = true;
-        } else if (label == "key2") {
+        }
+        else if (label == "key2") {
             if (hasKey2) { in.setstate(std::ios::failbit); break; }
-            in >> UnsignedBinaryIO{input.key2};
+            in >> UnsignedBinaryIO{ input.key2 };
             hasKey2 = true;
-        } else if (label == "key3") {
+        }
+        else if (label == "key3") {
             if (hasKey3) { in.setstate(std::ios::failbit); break; }
-            in >> StringIO{input.key3};
+            in >> StringIO{ input.key3 };
             hasKey3 = true;
-        } else {
+        }
+        else {
             in.setstate(std::ios::failbit);
             break;
         }
         if (in.fail()) break;
+
+        in >> std::ws;
+        char next = in.peek();
+        if (next == ':') {
+            in.get();
+            continue;
+        }
+        else if (next == ')') {
+            in.get();
+            break;
+        }
+        else {
+            in.setstate(std::ios::failbit);
+            break;
+        }
     }
-    if (hasKey1 && hasKey2 && hasKey3 && (in >> DelimiterIO{')'})) {
+
+    if (hasKey1 && hasKey2 && hasKey3) {
         dest = input;
-    } else {
+    }
+    else {
         in.setstate(std::ios::failbit);
     }
     return in;
@@ -151,15 +202,17 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
     iofmtguard guard(out);
-    out << "(:key1 " << std::scientific << std::setprecision(1)
-        << src.key1 << ":key2 0b" << formatBinary(src.key2)
-        << ":key3 \"" << src.key3 << "\":)";
+    out << "(:key1 " << std::scientific << std::setprecision(1) << src.key1;
+    out << ":key2 0b" << formatBinary(src.key2);
+    out << ":key3 \"" << src.key3 << "\":)";
     return out;
 }
 
 bool compareData(const DataStruct& a, const DataStruct& b) {
-    if (a.key1 != b.key1) return a.key1 < b.key1;
-    if (a.key2 != b.key2) return a.key2 < b.key2;
+    if (a.key1 < b.key1) return true;
+    if (b.key1 < a.key1) return false;
+    if (a.key2 < b.key2) return true;
+    if (b.key2 < a.key2) return false;
     return a.key3.length() < b.key3.length();
 }
 
@@ -171,11 +224,11 @@ int main() {
         std::istringstream iss(line);
         DataStruct temp;
         if (iss >> temp) {
-            storage.push_back(temp);
+            storage.push_back(std::move(temp));
         }
     }
     std::sort(storage.begin(), storage.end(), compareData);
     std::copy(storage.begin(), storage.end(),
-              std::ostream_iterator<DataStruct>(std::cout, "\n"));
+        std::ostream_iterator<DataStruct>(std::cout, "\n"));
     return 0;
 }
