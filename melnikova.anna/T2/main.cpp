@@ -163,7 +163,7 @@ namespace nspace {
     std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
-        out << "(:key1 " << std::fixed << std::setprecision(10) << src.key1 << "d";
+        out << "(:key1 " << std::fixed << std::setprecision(1) << src.key1 << "d";
         out << ":key2 (:N " << src.key2.first << ":D " << src.key2.second << ":)";
         out << ":key3 \"" << src.key3 << "\":)";
         return out;
