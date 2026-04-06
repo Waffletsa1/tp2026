@@ -3,12 +3,12 @@
 #include "shape.h"
 
 class Circle : public Shape{
-private: 
+private:
     Point centerP;
     double radius;
 public:
     Circle(const Point& center, double r);
-    
+
     double getArea() const override;
     Point getCenter() const override;
     void move(const Point& delta) override;
