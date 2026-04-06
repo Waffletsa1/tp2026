@@ -2,6 +2,7 @@
 #include <string>
 #include "Point.h"
 #include "Shape.h"
+#include <stdexcept>
 
 #ifndef RING_H
 #define RING_H
@@ -42,4 +43,5 @@ private:
     double maxRad_;
     Point center_;
 };
+
 #endif

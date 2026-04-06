@@ -14,11 +14,14 @@ double CompositeShape::getArea() const {
 }
 
 Point CompositeShape::getCenter() const {
-    double minX, minY, maxX, maxY;
-    minX = std::numeric_limits<double>::max();
-    minY = std::numeric_limits<double>::max();
-    maxX = std::numeric_limits<double>::lowest();
-    maxY = std::numeric_limits<double>::lowest();
+    if (shapes_.empty()) {
+        return Point(0.0, 0.0);
+    }
+
+    double minX = std::numeric_limits<double>::max();
+    double minY = std::numeric_limits<double>::max();
+    double maxX = std::numeric_limits<double>::lowest();
+    double maxY = std::numeric_limits<double>::lowest();
 
     for (const auto& s : shapes_) {
         Point p = s->getBottomLeft();
@@ -30,8 +33,8 @@ Point CompositeShape::getCenter() const {
         maxY = k.y_ > maxY ? k.y_ : maxY;
     }
 
-    double centerX = (maxX - minX) / 2 + minX;
-    double centerY = (maxY - minY) / 2 + minY;
+    double centerX = (maxX - minX) / 2.0 + minX;
+    double centerY = (maxY - minY) / 2.0 + minY;
     return Point(centerX, centerY);
 }
 

@@ -1,15 +1,16 @@
-﻿#include <iostream>
+﻿﻿#include <iostream>
 #include <iomanip>
 #include <memory>
 #include <vector>
 #include <cmath>
+#include <stdexcept>
 #include "Shape.h"
 #include "Rectangle.h"
 #include "Ring.h"
 #include "IsoscelesTrapezoid.h"
 #include "CompositeShape.h"
 
-void testResult(bool res, const std::string& testName) {
+void testResult(bool res, const std::string & testName) {
     std::cout << (res ? "[PASSED]\t" : "[FAILED]\t");
     std::cout << testName << '\n';
 }
@@ -119,13 +120,23 @@ void testComposite() {
 
     double oldAreaComp = composite->getArea();
 
-    double factor;
+    double factor = 1.0;
     std::cout << "Enter scale factor: ";
-    std::cin >> factor;
-
-    composite->scale(factor);
-    std::cout << "After scale(" << factor << "): area = " << composite->getArea() << "\n";
-    testResult(std::abs(composite->getArea() - oldAreaComp * factor * factor) < 0.01, "Composite scale area");
+    if (std::cin >> factor) {
+        try {
+            composite->scale(factor);
+            std::cout << "After scale(" << factor << "): area = " << composite->getArea() << "\n";
+            testResult(std::abs(composite->getArea() - oldAreaComp * factor * factor) < 0.01, "Composite scale area");
+        }
+        catch (const std::invalid_argument& e) {
+            std::cout << "Exception: " << e.what() << "\n";
+            testResult(false, "Composite scale area (exception)");
+        }
+    }
+    else {
+        std::cout << "Invalid input, scale skipped.\n";
+        testResult(false, "Composite scale area (no input)");
+    }
 
     const auto& shapes = composite->getShapes();
     bool centersOk = true;
@@ -155,5 +166,5 @@ int main() {
     std::cout << "\tALL TESTS COMPLETED\n";
     std::cout << std::string(40, '=') << "\n";
 
-    return 1;
+    return 0;
 }

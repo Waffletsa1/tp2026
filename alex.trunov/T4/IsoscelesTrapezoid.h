@@ -2,6 +2,7 @@
 #include <string>
 #include "Shape.h"
 #include "Point.h"
+#include <stdexcept>
 
 #ifndef ISOSCELESTRAPEZOID_H
 #define ISOSCELESTRAPEZOID_H

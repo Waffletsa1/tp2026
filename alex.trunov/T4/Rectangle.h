@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "Shape.h"
+#include <stdexcept>
 
 #ifndef RECTANGLE_H
 #define RECTANGLE_H
@@ -25,4 +26,4 @@ private:
     Point bottomLeft_, topRight_;
 };
 
-#endif // !RECTANGLE_H
+#endif
