@@ -141,7 +141,7 @@ std::istream& operator>>(std::istream& in, LabelIO&& dest) {
     dest.ref.clear();
 
     char c = '0';
-    while (in.get(c) && !std::isspace(c)) {
+    while (in.get(c) && !std::isspace((unsigned char)c)) {
         dest.ref.push_back(c);
     }
 
@@ -152,7 +152,7 @@ std::istream& operator>>(std::istream& in, LabelIO&& dest) {
 }
 
 void cleanup_whitespaces(std::istream& in) {
-    while (std::isspace(in.peek())) {
+    while (in.peek() != EOF && std::isspace((unsigned char)in.peek())) {
         in.get();
     }
 }
@@ -217,10 +217,6 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
         if (!in) {
             in.setstate(std::ios::failbit);
             return in;
-        }
-
-        if (in.peek() == ' ') {
-            in.get();
         }
 
         if (field_type == "key1" && !keys.is_set1()) {
