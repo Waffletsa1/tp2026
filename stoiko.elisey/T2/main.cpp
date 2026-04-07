@@ -1,4 +1,4 @@
-// var 5
+// variant 5
 // ULL OCT CMP LSP
 
 #include <algorithm>
