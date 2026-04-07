@@ -58,7 +58,7 @@ namespace nspace {
         if (!sentry) return in;
         std::string temp;
         char c;
-        while (in >> std::ws && in.get(c) && std::tolower(c) != 'd') {
+        while (in && in.get(c) && std::tolower(c) != 'd') {
             temp += c;
         }
         size_t dotPos = temp.find('.');
@@ -78,7 +78,7 @@ namespace nspace {
     std::istream& operator>>(std::istream& in, RationalLspIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
-        return in >> DelimiterIO{ '(' }
+        in >> DelimiterIO{ '(' }
             >> DelimiterIO{ ':' }
             >> DelimiterIO{ 'n' }
             >> dest.ref.first
@@ -87,6 +87,10 @@ namespace nspace {
             >> dest.ref.second
             >> DelimiterIO{ ':' }
         >> DelimiterIO{ ')' };
+        if (in && dest.ref.second == 0) {
+            in.setstate(std::ios::failbit);
+        }
+        return in;
     }
     std::istream& operator>>(std::istream& in, DataStruct& dest) {
         std::istream::sentry sentry(in);
