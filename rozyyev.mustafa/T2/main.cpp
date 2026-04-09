@@ -53,14 +53,13 @@ bool compareDataStruct(const DataStruct& a, const DataStruct& b);
 
 int main() {
     std::vector<DataStruct> data;
-    DataStruct temp;
 
-    while (true) {
-        if (std::cin >> temp) {
-            data.push_back(temp);
-        } else if (std::cin.eof()) {
-            break;
-        } else {
+    while (!std::cin.eof()) {
+        std::copy(std::istream_iterator<DataStruct>(std::cin),
+                  std::istream_iterator<DataStruct>(),
+                  std::back_inserter(data));
+
+        if (std::cin.fail() && !std::cin.eof()) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
@@ -68,9 +67,7 @@ int main() {
 
     std::sort(data.begin(), data.end(), compareDataStruct);
 
-    for (const auto& item : data) {
-        std::cout << item << '\n';
-    }
+    std::copy(data.begin(), data.end(), std::ostream_iterator<DataStruct>(std::cout, "\n"));
 
     return EXIT_SUCCESS;
 }
@@ -143,6 +140,8 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
 
     DataStruct input;
     bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
+
+    in >> std::ws;
 
     in >> DelimiterIO{ '(' } >> DelimiterIO{ ':' };
     if (!in) return in;
