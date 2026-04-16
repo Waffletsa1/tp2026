@@ -1,11 +1,13 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 #include <string>
+#include <iterator>
+#include <algorithm>
+#include <cctype>
 #include <sstream>
 #include <complex>
 #include <cmath>
+#include <limits>
 
 struct DataStruct
 {
@@ -14,142 +16,321 @@ struct DataStruct
     std::string key3;
 };
 
-std::istream& operator>>(std::istream& in, DataStruct& dest)
+struct DelimiterIO
 {
-    std::string line;
-    if (!std::getline(in, line))
+    char exp;
+};
+
+std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
+{
+    std::istream::sentry sentry(in, true);
+    if (!sentry)
     {
         return in;
     }
+    char c = '0';
+    in.get(c);
+    if (in && c != dest.exp)
+    {
+        in.setstate(std::ios::failbit);
+    }
+    return in;
+}
+
+struct SLLLiteralIO
+{
+    long long& ref;
+};
+
+std::istream& operator>>(std::istream& in, SLLLiteralIO&& dest)
+{
+    std::istream::sentry sentry(in, true);
+    if (!sentry)
+    {
+        return in;
+    }
+
+    std::string token;
+    char c;
+    while (in.get(c) && c != ':' && c != ')' && !std::isspace(c))
+    {
+        token.push_back(c);
+    }
+    in.unget();
+
+    if (token.empty())
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    if (token.size() >= 2 && (token.substr(token.size() - 2) == "LL" || token.substr(token.size() - 2) == "ll"))
+    {
+        token = token.substr(0, token.size() - 2);
+    }
+
+    size_t start = 0;
+    if (token[0] == '-')
+    {
+        start = 1;
+    }
+    for (size_t i = start; i < token.size(); i++)
+    {
+        if (!std::isdigit(static_cast<unsigned char>(token[i])))
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+    }
+
+    try
+    {
+        dest.ref = std::stoll(token);
+    }
+    catch (...)
+    {
+        in.setstate(std::ios::failbit);
+    }
+    return in;
+}
+
+struct ComplexIO
+{
+    std::complex<double>& ref;
+};
+
+std::istream& operator>>(std::istream& in, ComplexIO&& dest)
+{
+    std::istream::sentry sentry(in, true);
+    if (!sentry)
+    {
+        return in;
+    }
+
+    std::string token;
+    char c;
+    while (in.get(c) && c != ':' && c != ')' && !std::isspace(c))
+    {
+        token.push_back(c);
+    }
+    in.unget();
+
+    if (token.size() < 6)
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    if (token[0] != '#' || token[1] != 'c' || token[2] != '(' || token.back() != ')')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    std::string inside = token.substr(3, token.size() - 4);
+    std::stringstream ss(inside);
+    double real, imag;
     
-    size_t start = line.find('(');
-    size_t end = line.rfind(')');
-    if (start == std::string::npos || end == std::string::npos)
+    if (!(ss >> real >> imag))
     {
         in.setstate(std::ios::failbit);
         return in;
     }
     
-    std::string content = line.substr(start + 1, end - start - 1);
-    
-    long long k1 = 0;
-    std::complex<double> k2(0, 0);
-    std::string k3;
-    bool ok1 = false, ok2 = false, ok3 = false;
-    
-    size_t pos = 0;
-    while (pos < content.size())
+    dest.ref = std::complex<double>(real, imag);
+    return in;
+}
+
+struct StringIO
+{
+    std::string& ref;
+};
+
+std::istream& operator>>(std::istream& in, StringIO&& dest)
+{
+    std::istream::sentry sentry(in, true);
+    if (!sentry)
     {
-        if (content[pos] != ':')
+        return in;
+    }
+
+    char c;
+    in.get(c);
+    if (c != '"')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    dest.ref.clear();
+    while (in.get(c) && c != '"')
+    {
+        dest.ref.push_back(c);
+    }
+
+    if (!in)
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    return in;
+}
+
+struct IdentifierIO
+{
+    std::string& ref;
+};
+
+std::istream& operator>>(std::istream& in, IdentifierIO&& dest)
+{
+    std::istream::sentry sentry(in, true);
+    if (!sentry)
+    {
+        return in;
+    }
+
+    dest.ref.clear();
+    char c = '0';
+    while (in.get(c) && (std::isalpha(static_cast<unsigned char>(c)) ||
+        std::isdigit(static_cast<unsigned char>(c))))
+    {
+        dest.ref.push_back(c);
+    }
+
+    if (dest.ref.empty())
+    {
+        in.setstate(std::ios::failbit);
+    }
+    return in;
+}
+
+std::istream& operator>>(std::istream& in, DataStruct& dest)
+{
+    std::istream::sentry sentry(in);
+    if (!sentry)
+    {
+        return in;
+    }
+
+    while (std::isspace(in.peek()))
+    {
+        in.get();
+    }
+
+    if (in.peek() != '(')
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    DataStruct temp;
+    bool key1_set = false;
+    bool key2_set = false;
+    bool key3_set = false;
+
+    in >> DelimiterIO{ '(' };
+    if (!in)
+    {
+        return in;
+    }
+
+    while (in && in.peek() != ')')
+    {
+        if (in.peek() == ':')
         {
-            pos++;
-            continue;
+            in.get();
         }
-        pos++;
-        
-        size_t keyStart = pos;
-        while (pos < content.size() && content[pos] != ' ') pos++;
-        std::string key = content.substr(keyStart, pos - keyStart);
-        
-        if (pos >= content.size() || content[pos] != ' ')
+
+        std::string field_name;
+        in >> IdentifierIO{ field_name };
+        if (!in)
         {
             in.setstate(std::ios::failbit);
             return in;
         }
-        pos++;
-        
-        size_t valStart = pos;
-        int depth = 0;
-        bool inStr = false;
-        while (pos < content.size())
+
+        if (in.peek() == ' ')
         {
-            char c = content[pos];
-            if (c == '"' && (pos == 0 || content[pos-1] != '\\')) inStr = !inStr;
-            if (!inStr)
-            {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
-                if (depth == 0 && c == ':') break;
-            }
-            pos++;
+            in.get();
         }
-        std::string value = content.substr(valStart, pos - valStart);
-        
-        while (!value.empty() && std::isspace(value.back())) value.pop_back();
-        
-        if (key == "key1" && !ok1)
+
+        if (field_name == "key1" && !key1_set)
         {
-            std::string num = value;
-            if (num.size() >= 2 && num.substr(num.size()-2) == "LL")
-                num = num.substr(0, num.size()-2);
-            try {
-                k1 = std::stoll(num);
-                ok1 = true;
-            } catch(...) { in.setstate(std::ios::failbit); return in; }
+            in >> SLLLiteralIO{ temp.key1 };
+            key1_set = true;
         }
-        else if (key == "key2" && !ok2)
+        else if (field_name == "key2" && !key2_set)
         {
-            if (value.size() < 6 || value[0] != '#' || value[1] != 'c' || value[2] != '(' || value.back() != ')')
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-            std::string inside = value.substr(3, value.size()-4);
-            std::stringstream ss(inside);
-            double r, i;
-            if (!(ss >> r >> i))
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-            k2 = std::complex<double>(r, i);
-            ok2 = true;
+            in >> ComplexIO{ temp.key2 };
+            key2_set = true;
         }
-        else if (key == "key3" && !ok3)
+        else if (field_name == "key3" && !key3_set)
         {
-            if (value.size() < 2 || value.front() != '"' || value.back() != '"')
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-            k3 = value.substr(1, value.size()-2);
-            ok3 = true;
+            in >> StringIO{ temp.key3 };
+            key3_set = true;
         }
         else
         {
             in.setstate(std::ios::failbit);
             return in;
         }
+
+        if (!in)
+        {
+            return in;
+        }
+
+        if (in.peek() == ':')
+        {
+            in.get();
+        }
+        else if (in.peek() != ')')
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
     }
-    
-    if (ok1 && ok2 && ok3)
+
+    in >> DelimiterIO{ ')' };
+
+    if (in && key1_set && key2_set && key3_set)
     {
-        dest.key1 = k1;
-        dest.key2 = k2;
-        dest.key3 = k3;
+        dest = temp;
     }
     else
     {
         in.setstate(std::ios::failbit);
     }
-    
     return in;
 }
 
 std::ostream& operator<<(std::ostream& out, const DataStruct& src)
 {
+    std::ostream::sentry sentry(out);
+    if (!sentry)
+    {
+        return out;
+    }
+
     out << "(:key1 " << src.key1;
     out << ":key2 #c(" << src.key2.real() << " " << src.key2.imag() << ")";
     out << ":key3 \"" << src.key3 << "\":)";
+
     return out;
 }
 
-bool compare(const DataStruct& a, const DataStruct& b)
+bool compareDataStruct(const DataStruct& a, const DataStruct& b)
 {
-    if (a.key1 != b.key1) return a.key1 < b.key1;
-    double ma = std::abs(a.key2);
-    double mb = std::abs(b.key2);
-    if (ma != mb) return ma < mb;
+    if (a.key1 != b.key1)
+    {
+        return a.key1 < b.key1;
+    }
+    double modA = std::abs(a.key2);
+    double modB = std::abs(b.key2);
+    if (modA != modB)
+    {
+        return modA < modB;
+    }
     return a.key3.length() < b.key3.length();
 }
 
@@ -157,25 +338,39 @@ int main()
 {
     std::vector<DataStruct> data;
     std::string line;
-    
+
     while (std::getline(std::cin, line))
     {
-        if (line.empty()) continue;
-        std::istringstream ss(line);
-        DataStruct tmp;
-        if (ss >> tmp)
+        bool onlyWhitespace = true;
+        for (char c : line)
         {
-            data.push_back(tmp);
+            if (!std::isspace(static_cast<unsigned char>(c)))
+            {
+                onlyWhitespace = false;
+                break;
+            }
         }
+        if (onlyWhitespace)
+        {
+            continue;
+        }
+
+        std::istringstream lineStream(line);
+        std::copy(
+            std::istream_iterator<DataStruct>(lineStream),
+            std::istream_iterator<DataStruct>(),
+            std::back_inserter(data)
+        );
     }
-    
-    std::sort(data.begin(), data.end(), compare);
-    
-    for (const auto& x : data)
-    {
-        std::cout << x << "\n";
-    }
-    
+
+    std::sort(data.begin(), data.end(), compareDataStruct);
+
+    std::copy(
+        data.begin(),
+        data.end(),
+        std::ostream_iterator<DataStruct>(std::cout, "\n")
+    );
+
     return 0;
 }
 
