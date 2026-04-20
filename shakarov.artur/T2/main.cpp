@@ -62,7 +62,6 @@ int main() {
         if (std::cin.eof()) {
             break;
         }
-
         if (std::cin.fail()) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -101,7 +100,6 @@ std::istream& operator>>(std::istream& in, SllIO&& dest) {
     if (in.get(c1)) {
         if (in.get(c2)) {
             if ((c1 == 'l' || c1 == 'L') && (c2 == 'l' || c2 == 'L')) {
-                // Суффикс есть, съеден
             } else {
                 in.unget();
                 in.unget();
@@ -110,7 +108,6 @@ std::istream& operator>>(std::istream& in, SllIO&& dest) {
             in.unget();
         }
     }
-
     dest.ref = val;
     return in;
 }
@@ -119,10 +116,8 @@ std::istream& operator>>(std::istream& in, CmpIO&& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
 
-    double re = 0.0, im = 0.0;
-
+    double re, im;
     in >> DelimiterIO{ '#' } >> DelimiterIO{ 'c' } >> DelimiterIO{ '(' } >> re >> im >> DelimiterIO{ ')' };
-
     if (in) {
         dest.ref = std::complex<double>(re, im);
     }
@@ -133,12 +128,9 @@ std::istream& operator>>(std::istream& in, StrIO&& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
 
-    if (!(in >> DelimiterIO{ '"' })) {
-        return in;
-    }
-
+    in >> DelimiterIO{ '"' };
     std::getline(in, dest.ref, '"');
-    if (!in || in.eof()) {
+    if (!in) {
         in.setstate(std::ios::failbit);
     }
     return in;
@@ -148,64 +140,77 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
     std::istream::sentry sentry(in);
     if (!sentry) return in;
 
-    DataStruct input;
-    bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
+    DataStruct tmp;
+    bool f1 = false, f2 = false, f3 = false;
 
     in >> std::ws;
-    in >> DelimiterIO{ '(' };
-    if (!in) return in;
+    if (in.peek() != '(') {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    in.get(); // '('
 
     while (in && in.peek() != ')') {
-        in >> DelimiterIO{ ':' };
-        if (!in) break;
-
-        char k, e, y;
-        if (!(in.get(k) && in.get(e) && in.get(y))) {
+        in >> std::ws;
+        if (in.peek() != ':') {
             in.setstate(std::ios::failbit);
-            break;
+            return in;
         }
-        if (k != 'k' || e != 'e' || y != 'y') {
-            in.setstate(std::ios::failbit);
-            break;
+        in.get(); // ':'
+
+        std::string key;
+        char c;
+        while (in.get(c) && std::isalpha(c)) {
+            key += c;
         }
-        char num = in.get();
-        if (!in || (num != '1' && num != '2' && num != '3')) {
+        if (key != "key1" && key != "key2" && key != "key3") {
             in.setstate(std::ios::failbit);
-            break;
+            return in;
+        }
+        if (c != ' ') {
+            in.setstate(std::ios::failbit);
+            return in;
         }
 
-        in >> DelimiterIO{ ' ' };
-
-        if (num == '1' && !hasKey1) {
-            in >> SllIO{ input.key1 };
-            hasKey1 = true;
-        } else if (num == '2' && !hasKey2) {
-            in >> CmpIO{ input.key2 };
-            hasKey2 = true;
-        } else if (num == '3' && !hasKey3) {
-            in >> StrIO{ input.key3 };
-            hasKey3 = true;
+        if (key == "key1" && !f1) {
+            in >> SllIO{ tmp.key1 };
+            f1 = true;
+        } else if (key == "key2" && !f2) {
+            in >> CmpIO{ tmp.key2 };
+            f2 = true;
+        } else if (key == "key3" && !f3) {
+            in >> StrIO{ tmp.key3 };
+            f3 = true;
         } else {
             in.setstate(std::ios::failbit);
-            break;
+            return in;
         }
 
-        if (!in) break;
+        if (!in) return in;
 
-        if (in.peek() != ')' && in.peek() != ':') {
-            in.setstate(std::ios::failbit);
+        in >> std::ws;
+        if (in.peek() == ':') {
+            continue;
+        } else if (in.peek() == ')') {
             break;
+        } else {
+            in.setstate(std::ios::failbit);
+            return in;
         }
     }
 
-    in >> DelimiterIO{ ')' };
+    if (in.peek() == ')') {
+        in.get(); // ')'
+    } else {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
 
-    if (in && hasKey1 && hasKey2 && hasKey3) {
-        dest = std::move(input);
+    if (f1 && f2 && f3) {
+        dest = std::move(tmp);
     } else {
         in.setstate(std::ios::failbit);
     }
-
     return in;
 }
 
@@ -221,16 +226,12 @@ std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
 }
 
 bool compareDataStruct(const DataStruct& a, const DataStruct& b) {
-    if (a.key1 != b.key1)
-        return a.key1 < b.key1;
-
-    double absA = std::abs(a.key2);
-    double absB = std::abs(b.key2);
+    if (a.key1 != b.key1) return a.key1 < b.key1;
+    double ma = std::abs(a.key2);
+    double mb = std::abs(b.key2);
     const double eps = 1e-9;
-    if (std::abs(absA - absB) > eps)
-        return absA < absB;
-
-    return a.key3.length() < b.key3.length();
+    if (std::abs(ma - mb) > eps) return ma < mb;
+    return a.key3.size() < b.key3.size();
 }
 
 iofmtguard::iofmtguard(std::basic_ios<char>& s)
