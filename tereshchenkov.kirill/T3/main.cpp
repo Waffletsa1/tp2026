@@ -9,7 +9,6 @@
 #include <cmath>
 #include <iomanip>
 
-
 using namespace std::placeholders;
 
 struct Point {
