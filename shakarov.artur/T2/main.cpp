@@ -56,7 +56,7 @@ bool compareDataStruct(const DataStruct& a, const DataStruct& b);
 int main() {
     std::vector<DataStruct> data;
     std::string line;
-    
+
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
         std::istringstream ss(line);
@@ -65,13 +65,13 @@ int main() {
             data.push_back(tmp);
         }
     }
-    
+
     std::sort(data.begin(), data.end(), compareDataStruct);
-    
+
     for (const auto& d : data) {
         std::cout << d << "\n";
     }
-    
+
     return EXIT_SUCCESS;
 }
 
@@ -233,4 +233,5 @@ iofmtguard::~iofmtguard() {
     s_.precision(precision_);
     s_.flags(fmt_);
 }
+
 
