@@ -274,9 +274,14 @@ int main(int argc, char* argv[]) {
             else {
                 try {
                     int numVertices = std::stoi(param);
-                    double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
-                        SumAreasWithVertexCount(numVertices));
-                    std::cout << sum << "\n";
+                    if (numVertices < 3) {
+                        std::cout << "<INVALID COMMAND>\n";
+                    }
+                    else {
+                        double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                            SumAreasWithVertexCount(numVertices));
+                        std::cout << sum << "\n";
+                    }
                 }
                 catch (...) {
                     std::cout << "<INVALID COMMAND>\n";
@@ -335,19 +340,24 @@ int main(int argc, char* argv[]) {
             if (param == "EVEN") {
                 int count = std::count_if(polygons.begin(), polygons.end(),
                     IsEvenVertexCount());
-                std::cout << count << std::endl;
+                std::cout << count << "\n";
             }
             else if (param == "ODD") {
                 int count = std::count_if(polygons.begin(), polygons.end(),
                     IsOddVertexCount());
-                std::cout << count << std::endl;
+                std::cout << count << "\n";
             }
             else {
                 try {
                     int numVertices = std::stoi(param);
-                    int count = std::count_if(polygons.begin(), polygons.end(),
-                        HasVertexCount(numVertices));
-                    std::cout << count << std::endl;
+                    if (numVertices < 3) {
+                        std::cout << "<INVALID COMMAND>\n";
+                    }
+                    else {
+                        int count = std::count_if(polygons.begin(), polygons.end(),
+                            HasVertexCount(numVertices));
+                        std::cout << count << "\n";
+                    }
                 }
                 catch (...) {
                     std::cout << "<INVALID COMMAND>\n";
