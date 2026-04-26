@@ -37,8 +37,8 @@ double area(const Polygon& poly) {
     long long sum = 0;
     for (int i = 0; i < n; ++i) {
         int j = (i + 1) % n;
-        sum += (long long)p[i].x * p[j].y -
-            (long long)p[j].x * p[i].y;
+        sum += static_cast<long long>(p[i].x) * p[j].y -
+            static_cast<long long>(p[j].x) * p[i].y;
     }
     return std::abs(sum) / 2.0;
 }
@@ -56,8 +56,8 @@ struct IsOddVertexCount {
 };
 
 struct HasVertexCount {
-    int target;
-    HasVertexCount(int t) : target(t) {}
+    size_t target;
+    HasVertexCount(int t) : target(static_cast<size_t>(t)) {}
     bool operator()(const Polygon& p) const {
         return p.points.size() == target;
     }
@@ -143,8 +143,8 @@ struct SumOddAreas {
 };
 
 struct SumAreasWithVertexCount {
-    int target;
-    SumAreasWithVertexCount(int t) : target(t) {}
+    size_t target;
+    SumAreasWithVertexCount(int t) : target(static_cast<size_t>(t)) {}
     double operator()(double sum, const Polygon& p) const {
         if (p.points.size() == target) {
             return sum + area(p);
@@ -181,14 +181,14 @@ Polygon parsePolygon(const std::string& line) {
 int rmecho(std::vector<Polygon>& polygons, const Polygon& pol) {
     std::vector<Polygon> res;
     int count = 0;
-    int i = 0;
+    size_t i = 0;
     while (i < polygons.size()) {
         if (polygons[i] == pol) {
-            int j = i + 1;
+            size_t j = i + 1;
             while (j < polygons.size() && polygons[j] == pol) {
                 j++;
             }
-            count += j - i - 1;
+            count += static_cast<int>(j - i - 1);
             res.push_back(polygons[i]);
             i = j;
         }
@@ -225,9 +225,9 @@ int main(int argc, char* argv[]) {
     std::cout << std::fixed << std::setprecision(1);
     while (std::getline(std::cin, command)) {
         if (command.empty()) continue;
-        int start = command.find_first_not_of(" \t");
+        size_t start = command.find_first_not_of(" \t");
         if (start == std::string::npos) continue;
-        int end = command.find_last_not_of(" \t");
+        size_t end = command.find_last_not_of(" \t");
         command = command.substr(start, end - start + 1);
         if (command.find("RMECHO") == 0) {
             std::string strPol = command.substr(6);
